@@ -32,8 +32,8 @@ def generate_tex_file(expression, template_tex_file_body):
         new_body = template_tex_file_body.replace(
             TEX_TEXT_TO_REPLACE, expression
         )
-        with open(result, "w") as outfile:
-            outfile.write(new_body)
+        with open(result, "wb") as outfile:
+            outfile.write(new_body.encode('utf-8'))
     return result
 
 
