@@ -1,6 +1,9 @@
 from big_ol_pile_of_manim_imports import *
-from active_projects.clacks.question import *
+from old_projects.clacks.question import *
 from old_projects.div_curl import ShowTwoPopulations
+
+
+OUTPUT_DIRECTORY = "clacks/solution1"
 
 
 class FromPuzzleToSolution(MovingCameraScene):

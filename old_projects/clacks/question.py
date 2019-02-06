@@ -1,6 +1,7 @@
 from big_ol_pile_of_manim_imports import *
-import subprocess
-from pydub import AudioSegment
+
+
+OUTPUT_DIRECTORY = "clacks/question"
 
 
 class Block(Square):
@@ -15,7 +16,7 @@ class Block(Square):
         "stroke_color": WHITE,
         "fill_color": None,
         "sheen_direction": UL,
-        "sheen": 0.5,
+        "sheen_factor": 0.5,
         "sheen_direction": UL,
     }
 
@@ -45,7 +46,7 @@ class Block(Square):
     def mass_to_color(self, mass):
         colors = [
             LIGHT_GREY,
-            BLUE_B,
+            BLUE_D,
             BLUE_D,
             BLUE_E,
             BLUE_E,
@@ -217,23 +218,31 @@ class ClackFlashes(ContinualAnimation):
                 continue
             last_time = time
             flash = Flash(location, **self.flash_config)
+            for sm in flash.mobject.family_members_with_points():
+                if isinstance(sm, VMobject):
+                    sm.set_stroke(YELLOW, 3)
+                    sm.set_stroke(WHITE, 6, 0.5, background=True)
             flash.start_time = time
             flash.end_time = time + flash.run_time
             self.flashes.append(flash)
         ContinualAnimation.__init__(self, group, **kwargs)
 
     def update_mobject(self, dt):
-        total_time = self.external_time
+        total_time = self.get_time()
+        group = self.mobject
         for flash in self.flashes:
             if flash.start_time < total_time < flash.end_time:
-                if flash.mobject not in self.mobject:
-                    self.mobject.add(flash.mobject)
+                if flash.mobject not in group:
+                    group.add(flash.mobject)
                 flash.update(
                     (total_time - flash.start_time) / flash.run_time
                 )
             else:
-                if flash.mobject in self.mobject:
-                    self.mobject.remove(flash.mobject)
+                if flash.mobject in group:
+                    group.remove(flash.mobject)
+
+    def get_time(self):
+        return self.external_time
 
 
 class Wall(Line):
@@ -266,6 +275,7 @@ class Wall(Line):
 class BlocksAndWallScene(Scene):
     CONFIG = {
         "include_sound": True,
+        "collision_sound": "clack.wav",
         "count_clacks": True,
         "counter_group_shift_vect": LEFT,
         "sliding_blocks_config": {},
@@ -273,7 +283,6 @@ class BlocksAndWallScene(Scene):
         "wall_x": -6,
         "n_wall_ticks": 15,
         "counter_label": "\\# Collisions: ",
-        "collision_sound": "clack.wav",
         "show_flash_animations": True,
         "min_time_between_sounds": 0.004,
     }
@@ -345,56 +354,30 @@ class BlocksAndWallScene(Scene):
                 return
             self.counter_mob.set_value(n_clacks)
 
-    def create_sound_file(self, clack_data):
-        clack_file = os.path.join(SOUND_DIR, self.collision_sound)
-        output_file = self.get_movie_file_path(extension='.wav')
+    def add_clack_sounds(self, clack_data):
+        clack_file = self.collision_sound
+        total_time = self.get_time()
         times = [
             time
             for location, time in clack_data
-            if time < 300  # In case of any extremes
+            if time < total_time
         ]
-
-        clack = AudioSegment.from_wav(clack_file)
-        total_time = max(times) + 1
-        clacks = AudioSegment.silent(int(1000 * total_time))
-        last_position = 0
-        min_diff = int(1000 * self.min_time_between_sounds)
+        last_time = 0
         for time in times:
-            position = int(1000 * time)
-            d_position = position - last_position
-            if d_position < min_diff:
+            d_time = time - last_time
+            if d_time < self.min_time_between_sounds:
                 continue
-            if time > self.get_time():
-                break
-            last_position = position
-            clacks = clacks.fade(-50, start=position, end=position + 10)
-            clacks = clacks.overlay(
-                clack,
-                position=position
+            last_time = time
+            self.add_sound(
+                clack_file,
+                time_offset=(time - total_time),
+                gain=-20,
             )
-        clacks.export(output_file, format="wav")
-        return output_file
+        return self
 
-    # TODO, this no longer works
-    # should use Scene.add_sound instead
-    def combine_movie_files(self):
-        Scene.combine_movie_files(self)
+    def tear_down(self):
         if self.include_sound:
-            sound_file_path = self.create_sound_file(self.clack_data)
-            movie_path = self.get_movie_file_path()
-            temp_path = self.get_movie_file_path(str(self) + "TempSound")
-            commands = [
-                "ffmpeg",
-                "-i", movie_path,
-                "-i", sound_file_path,
-                "-c:v", "copy", "-c:a", "aac",
-                '-loglevel', 'error',
-                "-strict", "experimental",
-                temp_path,
-            ]
-            subprocess.call(commands)
-            subprocess.call(["rm", sound_file_path])
-            subprocess.call(["mv", temp_path, movie_path])
+            self.add_clack_sounds(self.clack_data)
 
 # Animated scenes
 
@@ -432,6 +415,10 @@ class NameIntro(Scene):
                 brown.to_edge, RIGHT, {"buff": 0},
                 rate_func=None,
             )
+        )
+        self.play(
+            Flash(brown.get_right(), run_time=flash_time),
+            Restore(brown, rate_func=None)
         )
 
 
@@ -757,6 +744,19 @@ class BlocksAndWallExampleMass1e2(BlocksAndWallExample):
             "block1_config": {
                 "mass": 1e2,
                 "velocity": -0.6,
+            }
+        },
+        "wait_time": 25,
+    }
+
+
+class BlocksAndWallExampleMassSameSpeedAtEnd(BlocksAndWallExample):
+    CONFIG = {
+        "sliding_blocks_config": {
+            "block1_config": {
+                "mass": 1 / np.tan(PI / 5)**2,
+                "velocity": -1,
+                "label_text": "$\\frac{1}{\\tan(\\pi / 5)^2}$ kg"
             }
         },
         "wait_time": 25,
@@ -1573,6 +1573,7 @@ class Thumbnail(BlocksAndWallExample, MovingCameraScene):
         "count_clacks": False,
         "show_flash_animations": False,
         "floor_y": -3.0,
+        "include_sound": False,
     }
 
     def setup(self):
@@ -1581,6 +1582,15 @@ class Thumbnail(BlocksAndWallExample, MovingCameraScene):
 
     def construct(self):
         self.camera_frame.shift(0.9 * UP)
+        # self.mobjects.insert(
+        #     0,
+        #     FullScreenFadeRectangle(
+        #         color=DARK_GREY,
+        #         opacity=0.5,
+        #         sheen_direction=UL,
+        #         sheen=0.5,
+        #     ),
+        # )
         self.thicken_lines()
         self.grow_labels()
         self.add_vector()
@@ -1600,7 +1610,7 @@ class Thumbnail(BlocksAndWallExample, MovingCameraScene):
 
     def add_vector(self):
         blocks = self.blocks
-        arrow = Vector(
+        arrow = self.arrow = Vector(
             2.5 * LEFT,
             color=RED,
             rectangular_stem_width=1.5,
@@ -1613,7 +1623,9 @@ class Thumbnail(BlocksAndWallExample, MovingCameraScene):
         self.add(arrow)
 
     def add_text(self):
-        question = TextMobject("How many\\\\collisions?")
+        question = self.question = TextMobject(
+            "How many\\\\collisions?"
+        )
         question.scale(2.5)
         question.to_edge(UP)
         question.set_color(YELLOW)
