@@ -12,13 +12,22 @@ ben_cairo_test.py
 .floo
 .flooignore
 .vscode
+.vs
 *.xml
 *.iml
 media
 manim.sublime-project
 manim.sublime-workspace
+.eggs/
+build/
+dist/
+manim.egg-info/
 
 primes.py
+<<<<<<< HEAD
 /media_dir.txt
 manim-media
 manim-myproject
+=======
+/media_dir.txt
+>>>>>>> upstream/master

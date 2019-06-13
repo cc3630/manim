@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 
 class Introduction(TeacherStudentsScene):
 
@@ -35,7 +35,7 @@ class Introduction(TeacherStudentsScene):
         self.play(
             FadeIn(
                 series,
-                submobject_mode = "lagged_start",
+                lag_ratio = 0.5,
                 run_time = 2
             ),
             Blink(self.get_teacher())

@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 from active_projects.eop.combinations import *
 from active_projects.eop.independence import *
@@ -128,5 +128,5 @@ class BinaryChoices(Scene):
         all = all.scale(2)
 
         self.play(
-            LaggedStart(FadeIn, all)
+            LaggedStartMap(FadeIn, all)
         )

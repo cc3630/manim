@@ -1,5 +1,5 @@
 
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 
 
@@ -50,8 +50,8 @@ class IllustrateAreaModelExpectation(Scene):
             p_labels.add(p_label)
             
         self.play(
-            LaggedStart(FadeIn,braces),
-            LaggedStart(FadeIn, p_labels)
+            LaggedStartMap(FadeIn,braces),
+            LaggedStartMap(FadeIn, p_labels)
         )
 
 

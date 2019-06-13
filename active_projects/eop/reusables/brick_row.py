@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusables.eop_helpers import *
 from active_projects.eop.reusables.eop_constants import *
 from active_projects.eop.reusables.upright_coins import *
@@ -196,7 +196,7 @@ class SplitRectsInBrickWall(AnimationGroup):
             subdiv = DashedLine(
                 mobject.get_top() + x * RIGHT,
                 mobject.get_bottom() + x * RIGHT,
-                dashed_segment_length = 0.05
+                dash_length = 0.05
             )
             subdivs.add(subdiv)
             anims.append(ShowCreation(subdiv))

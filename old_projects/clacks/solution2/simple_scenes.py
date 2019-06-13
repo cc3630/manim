@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from old_projects.lost_lecture import ShowWord
 from old_projects.clacks.solution2.mirror_scenes import ReflectWorldThroughMirrorNew
 from old_projects.clacks.question import Thumbnail
@@ -161,7 +161,7 @@ class ShowDotProductMeaning(Scene):
                 stroke_color=LIGHT_GREY,
                 stroke_width=1,
             )
-        w_line = updating_mobject_from_func(get_w_line)
+        w_line = always_redraw(get_w_line)
 
         def get_proj_v():
             center = dot.get_center()
@@ -172,16 +172,16 @@ class ShowDotProductMeaning(Scene):
             result.set_fill(v_vect.get_color(), 0.5)
             result.shift(center - result.get_start())
             return result
-        proj_v = updating_mobject_from_func(get_proj_v)
+        proj_v = always_redraw(get_proj_v)
 
         def get_proj_line():
             return DashedLine(
                 v_vect.get_end(),
                 proj_v.get_end(),
                 stroke_width=1,
-                dashed_segment_length=0.025,
+                dash_length=0.025,
             )
-        proj_line = updating_mobject_from_func(get_proj_line)
+        proj_line = always_redraw(get_proj_line)
 
         template_line = Line(LEFT, RIGHT)
 
@@ -194,10 +194,10 @@ class ShowDotProductMeaning(Scene):
             brace.rotate(angle, about_point=ORIGIN)
             brace.shift(vect.get_center())
             return brace
-        w_brace = updating_mobject_from_func(
+        w_brace = always_redraw(
             lambda: get_vect_brace(w_vect)
         )
-        proj_v_brace = updating_mobject_from_func(
+        proj_v_brace = always_redraw(
             lambda: get_vect_brace(proj_v)
         )
 
@@ -217,7 +217,7 @@ class ShowDotProductMeaning(Scene):
                 center + 1.5 * (p - center)
             )
             return VGroup(arc, theta)
-        arc = updating_mobject_from_func(get_arc)
+        arc = always_redraw(get_arc)
 
         self.add(
             title[:3],
@@ -438,7 +438,7 @@ class AskAboutAddingThetaToItself(Scene):
             eq, value,
             ineq, pi
         )
-        group.arrange_submobjects(RIGHT, buff=0.2)
+        group.arrange(RIGHT, buff=0.2)
         group.next_to(ORIGIN, DOWN, buff=LARGE_BUFF)
         theta_brace = Brace(group[2], DOWN, buff=SMALL_BUFF)
         theta_symbol = theta_brace.get_tex("\\theta")
@@ -464,7 +464,7 @@ class AskAboutAddingThetaToItself(Scene):
             result.set_color(get_color())
             result.move_to(ineq)
             return result
-        dynamic_ineq = updating_mobject_from_func(get_ineq)
+        dynamic_ineq = always_redraw(get_ineq)
         group.remove(ineq)
         group.add(dynamic_ineq)
 
@@ -508,7 +508,7 @@ class FinalFormula(Scene):
         )
         formula.set_color_by_tex_to_color_map(t2c_map)
         group = VGroup(text, formula)
-        group.arrange_submobjects(RIGHT)
+        group.arrange(RIGHT)
         group.scale(1.5)
         group.to_edge(UP)
 
@@ -556,7 +556,7 @@ class TwoSolutionsWrapper(WrapperScene):
             self.get_screen_rect(height=3)
             for x in range(2)
         ])
-        screen_rects.arrange_submobjects(RIGHT, buff=LARGE_BUFF)
+        screen_rects.arrange(RIGHT, buff=LARGE_BUFF)
         title = TextMobject("Two solutions")
         title.scale(1.5)
         title.to_edge(UP)
@@ -570,26 +570,26 @@ class TwoSolutionsWrapper(WrapperScene):
             Mortimer().scale(1.2)
         )
         pis.set_height(2)
-        pis.arrange_submobjects(RIGHT, buff=MED_LARGE_BUFF)
+        pis.arrange(RIGHT, buff=MED_LARGE_BUFF)
         pis.to_edge(DOWN, buff=SMALL_BUFF)
 
         self.add(big_rect, title, pis)
         self.play(
-            LaggedStart(
+            LaggedStartMap(
                 ShowCreation, screen_rects.copy().set_fill(opacity=0),
                 lag_ratio=0.8
             ),
-            LaggedStart(
+            LaggedStartMap(
                 FadeIn, screen_rects,
                 lag_ratio=0.8
             ),
-            LaggedStart(
+            LaggedStartMap(
                 ApplyMethod, pis,
                 lambda pi: (pi.change, "pondering", screen_rects[0])
             ),
         )
         self.play(Blink(random.choice(pis)))
-        self.play(LaggedStart(
+        self.play(LaggedStartMap(
             ApplyMethod, pis,
             lambda pi: (pi.change, "thinking", screen_rects[1])
         ))

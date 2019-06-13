@@ -1,12 +1,11 @@
 import random
 
-from manimlib.animation.composition import LaggedStart
+from manimlib.animation.composition import LaggedStartMap
 from manimlib.animation.creation import DrawBorderThenFill
-from manimlib.animation.creation import FadeIn
-from manimlib.animation.creation import FadeOut
 from manimlib.animation.creation import Write
+from manimlib.animation.fading import FadeIn
+from manimlib.animation.fading import FadeOut
 from manimlib.constants import *
-from manimlib.continual_animation.continual_animation import ContinualMovement
 from manimlib.for_3b1b_videos.pi_creature import Mortimer
 from manimlib.for_3b1b_videos.pi_creature import Randolph
 from manimlib.for_3b1b_videos.pi_creature_animations import Blink
@@ -19,8 +18,10 @@ from manimlib.mobject.svg.drawings import Logo
 from manimlib.mobject.svg.drawings import PatreonLogo
 from manimlib.mobject.svg.tex_mobject import TextMobject
 from manimlib.mobject.types.vectorized_mobject import VGroup
+from manimlib.mobject.mobject_update_utils import always_shift
 from manimlib.scene.moving_camera_scene import MovingCameraScene
 from manimlib.scene.scene import Scene
+from manimlib.utils.rate_functions import linear
 from manimlib.utils.space_ops import get_norm
 from manimlib.utils.space_ops import normalize
 
@@ -32,9 +33,8 @@ class OpeningQuote(Scene):
         "highlighted_quote_terms": {},
         "author": "",
         "fade_in_kwargs": {
-            "submobject_mode": "lagged_start",
-            "rate_func": None,
-            "lag_factor": 4,
+            "lag_ratio": 0.5,
+            "rate_func": linear,
             "run_time": 5,
         },
         "text_size": "\\Large",
@@ -102,7 +102,7 @@ class PatreonThanks(Scene):
         patreon_logo = PatreonLogo()
         patreon_logo.to_edge(UP)
 
-        patrons = list(map(TextMobject, self.specific_patrons))
+        patrons = list(map(TextMobject, self.specific_patronds))
         num_groups = float(len(patrons)) / self.max_patron_group_size
         proportion_range = np.linspace(0, 1, num_groups + 1)
         indices = (len(patrons) * proportion_range).astype('int')
@@ -115,7 +115,7 @@ class PatreonThanks(Scene):
             left_group = VGroup(*group[:len(group) / 2])
             right_group = VGroup(*group[len(group) / 2:])
             for subgroup, vect in (left_group, LEFT), (right_group, RIGHT):
-                subgroup.arrange_submobjects(DOWN, aligned_edge=LEFT)
+                subgroup.arrange(DOWN, aligned_edge=LEFT)
                 subgroup.scale(self.patron_scale_val)
                 subgroup.to_edge(vect)
 
@@ -132,7 +132,7 @@ class PatreonThanks(Scene):
                     DrawBorderThenFill(patreon_logo),
                 ]
             self.play(
-                LaggedStart(
+                LaggedStartMap(
                     FadeIn, group,
                     run_time=2,
                 ),
@@ -213,7 +213,14 @@ class PatreonEndScreen(PatreonThanks, PiCreatureScene):
         underline.next_to(thanks, DOWN, SMALL_BUFF)
         thanks.add(underline)
 
-        patrons = VGroup(*list(map(TextMobject, self.specific_patrons)))
+        changed_patron_names = map(
+            self.modify_patron_name,
+            self.specific_patrons,
+        )
+        patrons = VGroup(*map(
+            TextMobject,
+            changed_patron_names,
+        ))
         patrons.scale(self.patron_scale_val)
         for patron in patrons:
             if patron.get_width() > self.max_patron_width:
@@ -225,32 +232,34 @@ class PatreonEndScreen(PatreonThanks, PiCreatureScene):
         for column in columns:
             for n, name in enumerate(column):
                 name.shift(n * self.name_y_spacing * DOWN)
-        columns.arrange_submobjects(
+        columns.arrange(
             RIGHT, buff=LARGE_BUFF,
             aligned_edge=UP,
         )
         if columns.get_width() > self.max_patron_width:
             columns.set_width(total_width - 1)
 
-        thanks.to_edge(RIGHT)
-        columns.next_to(thanks, DOWN, 3 * LARGE_BUFF)
+        thanks.to_edge(RIGHT, buff=MED_SMALL_BUFF)
+        columns.next_to(underline, DOWN, buff=2)
 
         columns.generate_target()
-        columns.target.move_to(2 * DOWN, DOWN)
-        columns.target.align_to(
-            thanks, alignment_vect=RIGHT
-        )
+        columns.target.to_edge(DOWN, buff=2)
         vect = columns.target.get_center() - columns.get_center()
         distance = get_norm(vect)
         wait_time = 20
-        columns_shift = ContinualMovement(
+        always_shift(
             columns,
             direction=normalize(vect),
             rate=(distance / wait_time)
         )
 
-        self.add(columns_shift, black_rect, line, thanks)
+        self.add(columns, black_rect, line, thanks)
         self.wait(wait_time)
+
+    def modify_patron_name(self, name):
+        if name == "RedAgent14":
+            return "Brian Shepetofsky"
+        return name
 
 
 class LogoGenerationTemplate(MovingCameraScene):
@@ -271,7 +280,7 @@ class LogoGenerationTemplate(MovingCameraScene):
         name = self.channel_name
 
         self.play(
-            Write(name, run_time=3, lag_factor=2.5),
+            Write(name, run_time=3),
             *self.get_logo_animations(logo)
         )
         self.wait()
@@ -321,7 +330,7 @@ class Banner(Scene):
     def construct(self):
         pis = self.get_pis()
         pis.set_height(self.pi_height)
-        pis.arrange_submobjects(RIGHT, aligned_edge=DOWN)
+        pis.arrange(RIGHT, aligned_edge=DOWN)
         pis.move_to(self.pi_bottom, DOWN)
         self.add(pis)
 

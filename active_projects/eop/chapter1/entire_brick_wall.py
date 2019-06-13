@@ -1,5 +1,5 @@
 
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 from active_projects.eop.chapter1.brick_row_scene import BrickRowScene
 
@@ -71,7 +71,7 @@ class EntireBrickWall(BrickRowScene, MovingCameraScene):
         nb_tails_text.next_to(tails_counters[-1], RIGHT, buff = LARGE_BUFF)
 
         self.play(
-            LaggedStart(FadeIn, tails_counters),
+            LaggedStartMap(FadeIn, tails_counters),
             FadeIn(nb_tails_text)
         )
 

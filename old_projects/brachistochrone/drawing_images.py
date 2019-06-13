@@ -9,7 +9,7 @@ import random
 from scipy.spatial.distance import cdist
 from scipy import ndimage
 
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 
 
 DEFAULT_GAUSS_BLUR_CONFIG = {
@@ -146,7 +146,7 @@ class TracePicture(Scene):
             ShowCreation(
                 edge_mobject,
                 run_time = run_time,
-                rate_func = None
+                rate_func=linear
             )
         )
         self.remove(edge_mobject)

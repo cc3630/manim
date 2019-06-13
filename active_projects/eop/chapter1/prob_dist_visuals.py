@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 
 
@@ -198,7 +198,7 @@ class ProbabilityDistributions(PiCreatureScene):
         #     cell.add(label)
 
         # self.play(
-        #     LaggedStart(FadeIn, dice_table_grouped_cells,
+        #     LaggedStartMap(FadeIn, dice_table_grouped_cells,
         #         lag_ratio = lag_ratio, run_time = run_time)
         # )
         self.play(

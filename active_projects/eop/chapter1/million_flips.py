@@ -1,4 +1,4 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 
 
@@ -85,7 +85,7 @@ class MillionFlips(Scene):
         self.wait()
 
     def organize_group(self, group):
-        group.arrange_submobjects_in_grid(10)
+        group.arrange_in_grid(10)
         group.set_height(5)
         group.shift(DOWN + 2 * LEFT)
 

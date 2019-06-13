@@ -5,7 +5,7 @@ of manim available without having to worry about what namespace they come from.
 
 Rather than having a large pile of "from <module> import *" at the top of every such
 script, the intent of this file is to make it so that one can just include
-"from big_ol_pile_of_manim_imports import *".  The effects of adding more modules
+"from manimlib.imports import *".  The effects of adding more modules
 or refactoring the library on current or older scene scripts should be entirely
 addressible by changing this file.
 
@@ -19,6 +19,8 @@ from manimlib.constants import *
 from manimlib.animation.animation import *
 from manimlib.animation.composition import *
 from manimlib.animation.creation import *
+from manimlib.animation.fading import *
+from manimlib.animation.growing import *
 from manimlib.animation.indication import *
 from manimlib.animation.movement import *
 from manimlib.animation.numbers import *
@@ -32,12 +34,8 @@ from manimlib.camera.mapping_camera import *
 from manimlib.camera.moving_camera import *
 from manimlib.camera.three_d_camera import *
 
-from manimlib.continual_animation.continual_animation import *
-from manimlib.continual_animation.from_animation import *
-from manimlib.continual_animation.numbers import *
-from manimlib.continual_animation.update import *
-
 from manimlib.mobject.coordinate_systems import *
+from manimlib.mobject.changing import *
 from manimlib.mobject.frame import *
 from manimlib.mobject.functions import *
 from manimlib.mobject.geometry import *
@@ -56,8 +54,9 @@ from manimlib.mobject.three_dimensions import *
 from manimlib.mobject.types.image_mobject import *
 from manimlib.mobject.types.point_cloud_mobject import *
 from manimlib.mobject.types.vectorized_mobject import *
-from manimlib.mobject.updater import *
+from manimlib.mobject.mobject_update_utils import *
 from manimlib.mobject.value_tracker import *
+from manimlib.mobject.vector_field import *
 
 from manimlib.for_3b1b_videos.common_scenes import *
 from manimlib.for_3b1b_videos.pi_creature import *

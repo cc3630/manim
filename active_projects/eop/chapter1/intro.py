@@ -1,12 +1,11 @@
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from active_projects.eop.reusable_imports import *
 
 class Chapter1OpeningQuote(OpeningQuote):
     CONFIG = {
         "fade_in_kwargs": {
-            "submobject_mode": "lagged_start",
-            "rate_func": None,
-            "lag_factor": 9,
+            "lag_ratio": 0.5,
+            "rate_func": linear,
             "run_time": 10,
         },
         "text_size" : "\\normalsize",

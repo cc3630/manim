@@ -44,7 +44,6 @@ class GraphScene(Scene):
         "axes_color": GREY,
         "graph_origin": 2.5 * DOWN + 4 * LEFT,
         "exclude_zero_label": True,
-        "num_graph_anchor_points": 25,
         "default_graph_colors": [BLUE, GREEN, YELLOW],
         "default_derivative_color": GREEN,
         "default_input_color": YELLOW,
@@ -110,6 +109,7 @@ class GraphScene(Scene):
             numbers_with_elongated_ticks=self.y_labeled_nums,
             color=self.axes_color,
             line_to_number_vect=LEFT,
+            label_direction=LEFT,
         )
         y_axis.shift(self.graph_origin - y_axis.number_to_point(0))
         y_axis.rotate(np.pi / 2, about_point=y_axis.number_to_point(0))
@@ -120,7 +120,7 @@ class GraphScene(Scene):
         if self.y_axis_label:
             y_label = TextMobject(self.y_axis_label)
             y_label.next_to(
-                y_axis.get_tick_marks(), UP + RIGHT,
+                y_axis.get_corner(UP + RIGHT), UP + RIGHT,
                 buff=SMALL_BUFF
             )
             y_label.shift_onto_screen()
@@ -149,6 +149,7 @@ class GraphScene(Scene):
         color=None,
         x_min=None,
         x_max=None,
+        **kwargs
     ):
         if color is None:
             color = next(self.default_graph_colors_cycle)
@@ -167,7 +168,7 @@ class GraphScene(Scene):
         graph = ParametricFunction(
             parameterized_function,
             color=color,
-            num_anchor_points=self.num_graph_anchor_points,
+            **kwargs
         )
         graph.underlying_function = func
         return graph
@@ -302,7 +303,7 @@ class GraphScene(Scene):
     def transform_between_riemann_rects(self, curr_rects, new_rects, **kwargs):
         transform_kwargs = {
             "run_time": 2,
-            "submobject_mode": "lagged_start"
+            "lag_ratio": 0.5
         }
         added_anims = kwargs.get("added_anims", [])
         transform_kwargs.update(kwargs)
@@ -551,7 +552,7 @@ class GraphScene(Scene):
             kwargs["dx"] = dx
             kwargs["x"] = x
             new_group = self.get_secant_slope_group(**kwargs)
-            Transform(group, new_group).update(1)
+            group.become(new_group)
             return group
 
         self.play(

@@ -7,7 +7,7 @@ import sys
 import operator as op
 from random import sample
 
-from big_ol_pile_of_manim_imports import *
+from manimlib.imports import *
 from script_wrapper import command_line_create_scene
 from functools import reduce
 
@@ -131,7 +131,7 @@ class FlipThroughNumbers(Animation):
         mobject = TexMobject(str(self.current_number)).shift(start_center)
         Animation.__init__(self, mobject, **kwargs)
 
-    def update_mobject(self, alpha):
+    def interpolate_mobject(self, alpha):
         new_number = self.function(
             self.start + int(alpha *(self.end-self.start))
         )
